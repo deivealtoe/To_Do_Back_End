@@ -1,4 +1,3 @@
-const { update } = require('../database/index');
 const knex = require('../database/index');
 
 module.exports = {
