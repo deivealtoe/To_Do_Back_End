@@ -23,11 +23,13 @@ module.exports = {
                 results = await knex('todos')
                     .where({ 'todos.user_id': user_id })
                     .join('users', 'users.id', '=', 'todos.user_id')
-                    .select('todos.*', 'users.first_name', 'users.last_name', 'users.email');
+                    .select('todos.*', 'users.first_name', 'users.last_name', 'users.email')
+                    .orderBy('todos.id', 'asc');
             } else {
                 results = await knex('todos')
                     .join('users', 'users.id', '=', 'todos.user_id')
-                    .select('todos.*', 'users.first_name', 'users.last_name', 'users.email');
+                    .select('todos.*', 'users.first_name', 'users.last_name', 'users.email')
+                    .orderBy('todos.id', 'asc');
             }
             
             return response.status(200).json(results);

@@ -1,5 +1,4 @@
 const knex = require('../database/index');
-const { index } = require('./TodosController');
 
 module.exports = {
     async index(request, response, next) {
@@ -11,7 +10,7 @@ module.exports = {
             if (user_id) {
                 results = await knex('users').where({ 'id': user_id });
             } else {
-                results = await knex('users');
+                results = await knex('users').orderBy('users.id', 'asc');
             }
             
             return response.status(200).json(results);
