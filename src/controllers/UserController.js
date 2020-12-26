@@ -1,22 +1,20 @@
 const knex = require('../database/index');
+const { index } = require('./TodosController');
 
 module.exports = {
-    async getAll(request, response, next) {
+    async index(request, response, next) {
         try {
-            const results = await knex('users');
+            const { user_id } = request.query;
 
+            let results;
+
+            if (user_id) {
+                results = await knex('users').where({ 'id': user_id });
+            } else {
+                results = await knex('users');
+            }
+            
             return response.status(200).json(results);
-        } catch (error) {
-            next(error);
-        }
-    },
-    async getSingle(request, response, next) {
-        try {
-            const { id } = request.params;
-
-            const result = await knex('users').where({ id });
-
-            return response.status(200).json(result);
         } catch (error) {
             next(error);
         }

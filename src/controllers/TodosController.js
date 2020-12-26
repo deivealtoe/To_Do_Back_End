@@ -1,41 +1,36 @@
+const { update } = require('../database/index');
 const knex = require('../database/index');
-const { getSingle, create } = require('./UserController');
 
 module.exports = {
-    async getAll(request, response, next) {
+    async index(request, response, next) {
         try {
-            const results = await knex('todos')
-                .join('users', 'users.id', '=', 'todos.user_id')
-                .select('todos.*', 'users.first_name', 'users.last_name', 'users.email');
+            const { todo_id, user_id } = request.query;
 
-            return response.status(200).json(results);
-        } catch (error) {
-            next(error);
-        }
-    },
-    async getSingle(request, response, next) {
-        try {
-            const { id } = request.params;
+            console.log(todo_id, user_id);
 
-            const result = await knex('todos')
-                .where('todos.id', id)
-                .join('users', 'users.id', '=', 'todos.user_id')
-                .select('todos.*', 'users.first_name', 'users.last_name', 'users.email');;
+            let results;
 
-            return response.status(200).json(result);
-        } catch (error) {
-            next(error);
-        }
-    },
-    async getFromUser(request, response, next) {
-        try {
-            const { user_id } = request.params;
-
-            const results = await knex('todos')
-                .where('todos.user_id', user_id)
-                .join('users', 'users.id', '=', 'todos.user_id')
-                .select('todos.*', 'users.first_name', 'users.last_name', 'users.email');
-
+            if (todo_id && user_id) {
+                results = await knex('todos')
+                    .where({ 'todos.id': todo_id, 'todos.user_id': user_id })
+                    .join('users', 'users.id', '=', 'todos.user_id')
+                    .select('todos.*', 'users.first_name', 'users.last_name', 'users.email');
+            } else if (todo_id) {
+                results = await knex('todos')
+                    .where({ 'todos.id': todo_id })
+                    .join('users', 'users.id', '=', 'todos.user_id')
+                    .select('todos.*', 'users.first_name', 'users.last_name', 'users.email');
+            } else if (user_id) {
+                results = await knex('todos')
+                    .where({ 'todos.user_id': user_id })
+                    .join('users', 'users.id', '=', 'todos.user_id')
+                    .select('todos.*', 'users.first_name', 'users.last_name', 'users.email');
+            } else {
+                results = await knex('todos')
+                    .join('users', 'users.id', '=', 'todos.user_id')
+                    .select('todos.*', 'users.first_name', 'users.last_name', 'users.email');
+            }
+            
             return response.status(200).json(results);
         } catch (error) {
             next(error);
@@ -48,6 +43,29 @@ module.exports = {
             await knex('todos').insert({ todo, user_id });
 
             return response.status(201).json({ msg: 'To do created '});
+        } catch (error) {
+            next(error);
+        }
+    },
+    async delete(request, response, next) {
+        try {
+            const { id } = request.params;
+
+            await knex('todos').where({ id }).del();
+
+            return response.status(200).json({ msg: 'To do deleted' });
+        } catch (error) {
+            next(error);
+        }
+    },
+    async update(request, response, next) {
+        try {
+            const { id } = request.params;
+            const { todo } = request.body;
+
+            await knex('todos').update({ todo }).where({ id });
+
+            return response.status(200).json({ msg: 'To do updated' });
         } catch (error) {
             next(error);
         }
